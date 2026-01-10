@@ -28,16 +28,21 @@
     }
 
     body {
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-        background-color: #000;
-        margin: 0;
-        padding: 0;
-        font-family: 'Pretendard', sans-serif;
-        overflow: auto; /* 스크롤은 main-wrapper에서 제어 */
-    }
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            background-color: #000;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', sans-serif;
+            
+            /* [수정] PC 기본값: 스크롤 막음 (한눈에 보기 위해) */
+            overflow: hidden; 
+            
+            /* [수정] PC 기본값: 터치 액션 제한 없음 */
+            touch-action: auto; 
+        }
 
     img { -webkit-touch-callout: none; pointer-events: none; }
 
@@ -142,24 +147,24 @@
     .child-sidebar {
         position: fixed;
         top: 85px;          /* 상단 바와의 여유 공간 */
-        left: -220px;       /* [수정] 초기 숨김 위치 (너비 + 여유분) */
-        width: 180px;       /* [수정] 너비 축소 (기존 240px -> 180px) */
-        height: calc(100vh - 120px); 
+        left: -280px;       /* 초기 숨김 위치 */
+        width: 240px; 
+        height: calc(100vh - 120px); /* 하단 여유 공간 */
         background: var(--sidebar-bg);
         backdrop-filter: blur(20px);
         z-index: 99999;
         transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
-        box-shadow: 0 15px 40px rgba(0,0,0,0.15); 
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15); /* 사방 그림자로 플로팅 강조 */
         display: flex;
         flex-direction: column;
         padding: 30px 15px;
-        border: 1px solid rgba(0,0,0,0.05); 
-        border-radius: 20px; 
+        border: 1px solid rgba(0,0,0,0.05); /* 밀착형이 아니므로 테두리 추가 */
+        border-radius: 20px; /* 둥근 모서리로 부드러운 느낌 */
     }
 
     .child-sidebar.show {
-        /* [수정] 화면 왼쪽 끝에서 20px 띄운 지점까지 이동 (-220px + 240px = 20px) */
-        transform: translateX(240px); 
+        /* 화면 왼쪽 끝(0)에서 20px 띄운 지점까지만 이동 */
+        transform: translateX(300px); 
     }
 
     .sidebar-title {
@@ -205,12 +210,12 @@
 
     .section-wrapper {
         height: 100vh;
-        width: 100vw;
+        width: 100%;
         display: flex;
-        align-items: center; /* 수직 중앙 */
-        justify-content: center; /* 수평 중앙 */
-        overflow: hidden; /* 넘치는 부분 숨김 */
-        position: relative;
+        align-items: center;
+        justify-content: center;
+        scroll-snap-align: center;
+        flex-shrink: 0;
     }
 
     /* --- [5. 슬라이드 기본 설정 (1280x720 고정)] --- */
@@ -220,26 +225,16 @@
         padding: 20px 50px 40px 50px !important;
         box-sizing: border-box;
         display: flex;
-        flex-shrink: 0; 
-        transform-origin: center center;
         flex-direction: column;
         position: relative;
         overflow: hidden;
         border-radius: 15px;
         box-shadow: 0 20px 40px rgba(0,0,0,0.5);
         margin-left: 250px;
-        transition: transform 0.1s ease-out;
     }
 
     .slide.light { background-color: #fff; color: #2d3436; }
     .slide.dark { background-color: #121212; color: #fff; }
-
-    /* 모바일/태블릿(화면 너비 1280px 이하)일 때 사이드바 여백 제거 */
-    @media (max-width: 1280px) {
-        .slide {
-            margin-left: 0 !important; /* 사이드바 공간 무시하고 중앙 정렬 */
-        }
-    }
 
     /* 워터마크 (Confidential) */
     .slide::after {
@@ -459,51 +454,24 @@
         color: var(--accent-gold); /* 골드색으로 핵심 단어 강조 */
         font-weight: 700;
     }
-    /* 줌 컨트롤러 스타일 */
-    .zoom-controls {
-        position: fixed;
-        top: 20px;
-        right: 20px; /* 우측 상단 배치 (스크롤바 고려해서 위치 조정 가능) */
-        z-index: 99999;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        background: rgba(0, 0, 0, 0.6);
-        backdrop-filter: blur(10px);
-        padding: 8px 12px;
-        border-radius: 30px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    /* --- [모바일 및 태블릿 전용 사이드바 조정] --- */
+    /* body에 mobile-mode 클래스가 있을 때만 적용 */
+    body.mobile-mode .child-sidebar {
+        width: 160px;       /* 너비 더 축소 */
+        left: -170px;
+    }
+    
+    body.mobile-mode .child-sidebar.show {
+        transform: translateX(170px);
     }
 
-    .zoom-btn {
-        background: none;
-        border: none;
-        color: white;
-        cursor: pointer;
-        padding: 4px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        transition: background 0.2s;
+    body.mobile-mode .sidebar-title {
+        font-size: 8px;
     }
 
-    .zoom-btn:hover {
-        background: rgba(255, 255, 255, 0.2);
-    }
-
-    .zoom-btn:active {
-        transform: scale(0.95);
-    }
-
-    #zoom-level {
-        color: white;
-        font-size: 14px;
-        font-weight: 600;
-        min-width: 45px;
-        text-align: center;
-        font-family: 'Pretendard', sans-serif;
+    body.mobile-mode .child-item {
+        font-size: 10.5px;
+        padding: 8px 10px;
     }
 </style>
 </head>
@@ -579,20 +547,6 @@
     <nav id="sidebar-content">
         </nav>
 </aside>
-<div class="zoom-controls">
-    <button onclick="controlZoom(-0.1)" class="zoom-btn">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-        </svg>
-    </button>
-    <span id="zoom-level">100%</span>
-    <button onclick="controlZoom(0.1)" class="zoom-btn">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-        </svg>
-    </button>
-</div>
 <div class="main-wrapper">
     <div class="scroll-nav">
         <button class="scroll-btn" onclick="moveSlide(-1)">▲</button>
@@ -1116,7 +1070,7 @@
             </div>
         </div>
 
-        <div style="margin-top: 30px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; height: 560px;">
+        <div style="margin-top: 0px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; height: 560px;">
             
             <div style="background: #fff; border-radius: 24px; border: 1px solid #eee; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.03);">
                 <div style="background: #2d3436; padding: 22px; border-radius: 24px 24px 0 0; text-align: center;">
@@ -1626,7 +1580,7 @@
             </div>
         </div>
 
-        <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, 1fr); gap: 12px; height: 550px;">
+        <div style="margin-top: 0px; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, 1fr); gap: 12px; height: 550px;">
             
             <div style="background: #fff; border-radius: 20px; padding: 20px; border: 1px solid #eee; display: flex; gap: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.02); align-items: center;">
                 <div style="flex-shrink: 0; width: 60px; height: 60px; background: #2d3436; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 26px;">👨‍🍳</div>
@@ -1734,54 +1688,56 @@
             <h1 style="margin-top: 5px; font-weight: 900; font-size: 28px;">&lt;골드디거&gt; BRAND PARTNERSHIP SETUP</h1>
         </div>
 
-        <div style="margin-top: 25px; display: grid; grid-template-columns: 1.2fr 1fr; gap: 25px; height: 530px;">
+        <!-- 전체 높이를 550px로 유지하며 내부 요소들이 이 안에서만 움직이도록 설정 -->
+        <div style="margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; height: 550px; overflow: hidden;">
             
-            <div style="display: flex; flex-direction: column; gap: 20px;">
+            <!-- 왼쪽 컬럼 -->
+            <div style="display: flex; flex-direction: column; gap: 15px; min-height: 0;">
                 
-                <div style="background: #fdfbff; border-radius: 24px; padding: 25px; border: 1px solid #e0e0ff; box-shadow: 0 10px 20px rgba(0,0,0,0.02);">
-                    <h3 style="margin: 0 0 15px 0; font-size: 18px; color: #2d3436; display: flex; align-items: center; gap: 10px;">
-                        <span style="background: var(--accent-purple); color: #fff; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800;">!</span>
+                <div style="background: #fdfbff; border-radius: 24px; padding: 20px; border: 1px solid #e0e0ff; box-shadow: 0 10px 20px rgba(0,0,0,0.02);">
+                    <h3 style="margin: 0 0 12px 0; font-size: 17px; color: #2d3436; display: flex; align-items: center; gap: 10px;">
+                        <span style="background: var(--accent-purple); color: #fff; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800;">!</span>
                         2월: 4월 크랭크인 대비 파트너십 확정기
                     </h3>
-                    <p style="font-size: 13px; color: #444; line-height: 1.7; margin-bottom: 15px;">
+                    <p style="font-size: 12.5px; color: #444; line-height: 1.6; margin-bottom: 12px;">
                         4월 본격 촬영 돌입 전, 의상 컨셉 확정 및 브랜드 협의를 완료해야 하는 핵심 골든타임. <br>프리랜서 디자이너의 비주얼 정체성을 결정짓는 <strong>'포터리 스타일'</strong> 브랜드 라인업 구축 착수.
                     </p>
-                    <ul style="margin: 0; padding-left: 20px; font-size: 12.5px; color: #636e72; line-height: 1.8;">
-                        <li><strong>브랜드 리스트업 (2월 초):</strong> 2026 트렌드 부합 브랜드 컨택 및 제안서 배포</li>
-                        <li><strong>비주얼 피팅 및 협의 (2월 중):</strong> 캐릭터 무드에 맞는 수트 실루엣 및 워치 모델 확정</li>
-                        <li><strong>파트너십 계약 완료 (2월 말):</strong> 제작 지원 및 브랜드 공식 앰버서더 빌드업 계약 체결</li>
+                    <ul style="margin: 0; padding-left: 18px; font-size: 12px; color: #636e72; line-height: 1.7;">
+                        <li><strong>브랜드 리스트업:</strong> 2026 트렌드 부합 브랜드 제안서 배포</li>
+                        <li><strong>비주얼 피팅:</strong> 캐릭터 무드에 맞는 실루엣 및 워치 확정</li>
+                        <li><strong>파트너십 계약:</strong> 제작 지원 및 공식 앰버서더 계약 체결</li>
                     </ul>
                 </div>
 
-                <div style="background: #fff; border-radius: 24px; padding: 25px; border: 1px solid #eee; box-shadow: 0 10px 20px rgba(0,0,0,0.02);">
-                    <h3 style="margin: 0 0 15px 0; font-size: 18px; color: #2d3436; display: flex; align-items: center; gap: 10px;">
-                        <span style="background: var(--accent-gold); color: #fff; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800;">2</span>
-                        &lt;골드디거&gt; 캐릭터 기반 전략적 브랜드 협업
+                <div style="background: #fff; border-radius: 24px; padding: 20px; border: 1px solid #eee; box-shadow: 0 10px 20px rgba(0,0,0,0.02); flex: 1;">
+                    <h3 style="margin: 0 0 12px 0; font-size: 17px; color: #2d3436; display: flex; align-items: center; gap: 10px;">
+                        <span style="background: var(--accent-gold); color: #fff; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800;">2</span>
+                        캐릭터 기반 전략적 브랜드 협업
                     </h3>
-                    <div style="display: flex; flex-direction: column; gap: 12px;">
-                        <div style="background: #f8f9fa; padding: 15px; border-radius: 12px; border-left: 5px solid var(--accent-gold);">
-                            <strong style="font-size: 13px; color: #2d3436; display: block; margin-bottom: 5px;">[2026 Trend: Pottery Style 적용]</strong>
-                            <p style="font-size: 12px; color: #636e72; margin: 0; line-height: 1.6;">
-                                • 프리랜서 디자이너의 지적인 무드와 2026년 메가 트렌드인 '포터리 스타일(편안하면서도 정교한 실루엣)'수트 협찬 매칭<br>
-                                • 클래식한 가치를 강조하는 하이엔드 워치 및 데일리 럭셔리 아이템 레이어링으로 고감도 캐릭터 비주얼 완성
-                            </p>
-                        </div>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 12px; border-left: 5px solid var(--accent-gold);">
+                        <strong style="font-size: 12.5px; color: #2d3436; display: block; margin-bottom: 5px;">[2026 Trend: Pottery Style 적용]</strong>
+                        <p style="font-size: 12px; color: #636e72; margin: 0; line-height: 1.6;">
+                            • 프리랜서 디자이너의 지적인 무드와 '포터리 스타일' 수트 매칭<br>
+                            • 하이엔드 워치 및 데일리 럭셔리 레이어링으로 고감도 비주얼 완성
+                        </p>
                     </div>
                 </div>
             </div>
 
-            <div style="display: flex; flex-direction: column; gap: 20px;">
-                <div style="flex: 1.5; background: #2d3436; border-radius: 24px; overflow: hidden; position: relative; border: 1px solid #eee;">
-                    <img src="KakaoTalk_20260108_165114640.jpg" alt="2월 브랜드 제안용 룩북" style="width: 100%; height: 80%; object-fit: cover;">
-                    
-                    <div style="position: absolute; top: 20px; left: 20px; background: var(--accent-purple); color: #fff; padding: 5px 12px; border-radius: 50px; font-size: 11px; font-weight: 700; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">하이엔드 브랜드 공략</div>
+            <!-- 오른쪽 컬럼 (여기가 핵심 수정 부분) -->
+            <div style="display: flex; flex-direction: column; gap: 15px; min-height: 0;">
+                <!-- 이미지가 차지하는 공간을 유연하게 설정 -->
+                <div style="flex: 1; min-height: 0; background: #2d3436; border-radius: 24px; overflow: hidden; position: relative; border: 1px solid #eee;">
+                    <img src="KakaoTalk_20260108_165114640.jpg" alt="2월 브랜드 제안용 룩북" style="width: 100%; height: 100%; object-fit: cover;">
+                    <div style="position: absolute; top: 15px; left: 15px; background: var(--accent-purple); color: #fff; padding: 4px 10px; border-radius: 50px; font-size: 10px; font-weight: 700; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">하이엔드 브랜드 공략</div>
                 </div>
 
-                <div style="background: #f8f9fa; border-radius: 20px; padding: 25px; border-left: 6px solid var(--accent-purple);">
-                    <p style="margin: 0; font-size: 13px; color: #2d3436; line-height: 1.7; font-weight: 500;">
-                        • <strong>영리한 파트너십 실행 </strong><br>   트렌드 아이템(워치/수트) 협찬 확정을 통해 배우의 고급스러운 이미지를 자산화.<br>
-                        • <strong>단순 협찬 그 이상의 모델 </strong><br>   캐릭터 라이프스타일 노출을 통한 브랜드 공식 앰버서더 발탁을 위한 빌드업.<br>
-                        • <strong>4월 촬영 최적화 </strong><br>   긴밀한 협의를 통해 모든 브랜드 매칭을 종료, 촬영 시 캐릭터 완성도 극대화.
+                <!-- 하단 텍스트 박스 고정 -->
+                <div style="background: #f8f9fa; border-radius: 20px; padding: 20px; border-left: 6px solid var(--accent-purple);">
+                    <p style="margin: 0; font-size: 12.5px; color: #2d3436; line-height: 1.6; font-weight: 500;">
+                        • <strong>영리한 파트너십 실행 </strong><br> 트렌드 아이템 협찬을 통해 배우의 고급스러운 이미지 자산화.<br>
+                        • <strong>앰버서더 빌드업 </strong><br> 캐릭터 라이프스타일 노출을 통한 공식 모델 발탁 전략.<br>
+                        • <strong>촬영 최적화 </strong><br> 4월 전 모든 브랜드 매칭 종료, 캐릭터 완성도 극대화.
                     </p>
                 </div>
             </div>
@@ -1797,7 +1753,7 @@
             <h1 style="margin-top: 5px; font-weight: 900; font-size: 28px;">DRAMA PEAK & BRAND VALUE</h1>
         </div>
 
-        <div style="margin-top: 30px; display: flex; gap: 30px; height: 520px;">
+        <div style="margin-top: -10px; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, 1fr); gap: 12px; height: 550px;">
             
             <div style="flex: 1.1; position: relative; border-radius: 20px; overflow: hidden; background: #2d3436; border: 1px solid #eee;">
                 <img src="mar_main_visual.jpg" alt="March Visual Asset" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.9;">
@@ -1864,46 +1820,36 @@
     </div>
 </div>
 <div class="section-wrapper">
-    <div class="slide light" style="background-color: #f9fbfb; font-family: 'Pretendard', sans-serif; padding: 40px; overflow: hidden;">
+    <div class="slide light" style="background-color: #f9fbfb; font-family: 'Pretendard', sans-serif; padding: 40px; overflow: hidden; position: relative;">
         
         <style>
             :root {
                 --accent-purple: #6c5ce7;
                 --accent-gold: #d4af37;
             }
-            .header { text-align: left; border-bottom: 2px solid var(--accent-purple); padding-bottom: 10px; margin-bottom: 30px; }
+            .header { text-align: left; border-bottom: 2px solid var(--accent-purple); padding-bottom: 10px; margin-bottom: 25px; }
             .header h1 { margin-top: 5px; font-weight: 900; font-size: 32px; color: #2d3436; }
             
-            .card-container { display: grid; grid-template-columns: 1fr 1.3fr; gap: 30px; height: 580px; }
+            /* 컨테이너 높이를 550px로 하향 조정하여 하단 겹침 방지 */
+            .card-container { display: grid; grid-template-columns: 1fr 1.3fr; gap: 30px; height: 550px; }
             
-            /* 론진 앰버서더 강조 카드 */
             .ambassador-card {
-                background: #2d3436; border-radius: 24px; padding: 30px; color: #fff;
+                background: #2d3436; border-radius: 24px; padding: 25px; color: #fff;
                 position: relative; overflow: hidden; border-left: 6px solid var(--accent-gold);
                 box-shadow: 0 15px 40px rgba(0,0,0,0.2);
                 display: flex; flex-direction: column;
             }
 
-            /* 가상 광고 컷 영역 */
+            /* 이미지 영역 높이를 200px로 줄임 */
             .mockup-container {
-                position: relative; width: 100%; height: 240px;
-                background: #1a1a1a; border-radius: 15px; margin: 20px 0;
+                position: relative; width: 100%; height: 200px;
+                background: #1a1a1a; border-radius: 15px; margin: 15px 0;
                 overflow: hidden; border: 1px solid rgba(212, 175, 55, 0.3);
             }
             .mockup-img { width: 100%; height: 100%; object-fit: cover; opacity: 0.9; }
-            .mockup-overlay {
-                position: absolute; top: 15px; right: 20px; text-align: right;
-                text-shadow: 0 2px 10px rgba(0,0,0,0.8);
-            }
             
-            .replacement-tag {
-                background: var(--accent-gold); color: #000; padding: 5px 12px;
-                font-size: 11px; font-weight: 900; border-radius: 4px; display: inline-block;
-                margin-bottom: 10px; animation: pulse 2s infinite;
-            }
-            @keyframes pulse { 0% { opacity: 0.7; } 50% { opacity: 1; } 100% { opacity: 0.7; } }
-
             .tier-arrow { color: var(--accent-gold); font-size: 18px; margin: 0 10px; }
+            .icon-badge { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 6px; margin-right: 8px; font-size: 14px; }
         </style>
 
         <div class="header">
@@ -1913,63 +1859,63 @@
 
         <div class="card-container">
             <div class="card">
-                <h3 style="color: var(--accent-purple);">
+                <h3 style="color: var(--accent-purple); margin-top: 0;">
                     <span class="icon-badge" style="background: var(--accent-purple);">🎫</span>
                     01. 단독 팬미팅 컨셉 및 준비
                 </h3>
                 
                 <div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px;">
-                        <div style="background: #fdfbff; padding: 20px; border-radius: 15px; border: 1px solid #e0e0ff;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                        <div style="background: #fdfbff; padding: 18px; border-radius: 15px; border: 1px solid #e0e0ff;">
                             <div style="font-size: 10px; color: #999; margin-bottom: 5px; font-weight: 700; letter-spacing: 1px;">THEMATIC PLANNING</div>
                             <div style="font-size: 16px; font-weight: 800; color: var(--accent-purple);">스토리텔링 기획</div>
                             <p style="font-size: 11px; color: #636e72; margin-top: 5px;">배우의 본질적 매력을 담은 독창적 테마</p>
                         </div>
-                        <div style="background: #fdfbff; padding: 20px; border-radius: 15px; border: 1px solid #e0e0ff;">
+                        <div style="background: #fdfbff; padding: 18px; border-radius: 15px; border: 1px solid #e0e0ff;">
                             <div style="font-size: 10px; color: #999; margin-bottom: 5px; font-weight: 700; letter-spacing: 1px;">EXCLUSIVE MERCH</div>
                             <div style="font-size: 16px; font-weight: 800; color: var(--accent-purple);">굿즈 라인업 확정</div>
                             <p style="font-size: 11px; color: #636e72; margin-top: 5px;">고감도 디자인의 1차 한정판 MD 제작</p>
                         </div>
                     </div>
 
-                    <div style="background: #f8f9fa; padding: 20px; border-radius: 18px; border: 1px dashed #ccc; margin-bottom: 25px;">
+                    <div style="background: #f8f9fa; padding: 18px; border-radius: 18px; border: 1px dashed #ccc; margin-bottom: 20px;">
                         <strong style="font-size: 14px; color: #2d3436; display: block; margin-bottom: 8px;">[SPECIAL INTERACTION] 포토이즘 아티스트 프레임</strong>
                         <p style="font-size: 12.5px; color: #636e72; line-height: 1.6; margin: 0;">
                             드라마 방영기 오프라인 접점 확대를 위한 <strong>전용 아티스트 프레임 런칭</strong>.<br>
-                            글로벌 팬덤의 인증샷 바이럴을 통한 팬덤 데이터 및 확산 파급력 확보.
+                            글로벌 팬덤의 인증샷 바이럴을 통한 데이터 확보.
                         </p>
                     </div>
                 </div>
                 
-                <div style="background: var(--accent-purple); color: #fff; padding: 18px; border-radius: 15px; text-align: center; font-size: 13px; font-weight: 700; margin-top: 20px;">
-                    "팬덤의 <span style="color: #ffeaa7;">충성도를 견고히 다지는</span> 오프라인 브랜딩 거점 구축"
+                <div style="background: var(--accent-purple); color: #fff; padding: 15px; border-radius: 15px; text-align: center; font-size: 13px; font-weight: 700;">
+                    "팬덤의 <span style="color: #ffeaa7;">충성도를 견고히 다지는</span> 브랜딩 거점 구축"
                 </div>
             </div>
 
             <div class="ambassador-card">
                 <div>
-                    <h3 style="margin: 0 0 10px 0; font-size: 26px; color: var(--accent-gold); font-weight: 900;">LONGINES x NOH SANG HYUN</h3>
+                    <h3 style="margin: 0 0 5px 0; font-size: 24px; color: var(--accent-gold); font-weight: 900;">LONGINES x NOH SANG HYUN</h3>
                 </div>
 
                 <div class="mockup-container">
                     <img src="nohsanghyun_longines_mockup.png" class="mockup-img" alt="Noh Sang Hyun Longines Ad Mockup">
                 </div>
 
-                <div style="flex: 1; display: flex; flex-direction: column; gap: 15px;">
-                    <div style="display: flex; gap: 12px;">
-                        <span style="font-size: 18px;">🔄</span>
-                        <p style="font-size: 13px; margin: 0; line-height: 1.6;">
-                            <strong>앰버서더 세대교체:</strong><br> 기존 이미지를 넘어선 신선하고 도회적인 마스크로 브랜드 이미지 영 타겟화(Young Targeting) 추진.
+                <div style="flex: 1; display: flex; flex-direction: column; gap: 12px;">
+                    <div style="display: flex; gap: 10px;">
+                        <span style="font-size: 16px;">🔄</span>
+                        <p style="font-size: 12.5px; margin: 0; line-height: 1.5;">
+                            <strong>앰버서더 세대교체:</strong> 도회적인 마스크로 브랜드 이미지 영 타겟화 추진.
                         </p>
                     </div>
-                    <div style="display: flex; gap: 12px; align-items: center; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 10px;">
-                        <span style="font-size: 13px; font-weight: 800; color: var(--accent-gold);">BRAND STEP-UP</span>
-                        <span style="font-size: 12px; color: #fff;">LONGINES</span>
-                        <span class="tier-arrow">▶</span>
-                        <span style="font-size: 12px; color: #fff; font-weight: 800;">CARTIER</span>
+                    <div style="display: flex; gap: 12px; align-items: center; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px;">
+                        <span style="font-size: 12px; font-weight: 800; color: var(--accent-gold);">STEP-UP</span>
+                        <span style="font-size: 11px; color: #fff;">LONGINES</span>
+                        <span class="tier-arrow" style="font-size: 14px;">▶</span>
+                        <span style="font-size: 11px; color: #fff; font-weight: 800;">CARTIER</span>
                     </div>
-                    <p style="font-size: 12px; color: #aaa; margin: 0; padding-left: 30px;">
-                        * 론진 엠버서더 획득을 통해 광고 티어를 상향시킨 후, 최종적으로 까르띠에와 같은 하이 주얼리 브랜드 진입을 목표로 함.
+                    <p style="font-size: 11px; color: #aaa; margin: 0; line-height: 1.4;">
+                        * 론진 엠버서더 획득 후 최종적으로 까르띠에 등 하이 주얼리 브랜드 진입 목표.
                     </p>
                 </div>
             </div>
@@ -2171,12 +2117,12 @@
 </div>
 <div class="section-wrapper">
     <div class="slide light">
-        <div class="header" style="text-align: left; border-bottom: 2px solid var(--accent-mint); margin-bottom: 20px; padding-bottom: 10px;">
+        <div class="header" style="text-align: left; border-bottom: 2px solid var(--accent-mint); margin-bottom: 10px; padding-bottom: 10px;">
             <p style="color: var(--accent-mint); font-weight: 800; margin: 0; letter-spacing: 2px;">04-05. DIGITAL REFERENCE</p>
             <h1 style="margin: 0; margin-top: 5px; font-weight: 900; font-size: 28px;">SHORT-FORM VIRAL REFERENCES</h1>
-        </div>
+            </div>
 
-        <div class="video-grid-container">
+        <div class="video-grid-container" style="margin-top: 5px;">
             <div class="video-card">
                 <div class="phone-frame">
                     <div class="phone-inner-screen">
@@ -2219,10 +2165,10 @@
                 </div>
             </div>
         </div>
-        <div class="page-num" style="bottom: 30px; right: 50px; font-size: 12px; color: #999;">19-1. DIGITAL REFERENCE</div>
+        
+        <div class="page-num" style="position: absolute; bottom: 30px; right: 50px; font-size: 12px; color: #999;">19-1. DIGITAL REFERENCE</div>
     </div>
 </div>
-
 <div class="section-wrapper">
     <div class="slide light" style="background-color: #fdfbff; overflow: hidden;">
         <div class="header" style="text-align: left; border-bottom: 2px solid var(--accent-purple); padding-bottom: 10px;">
@@ -2560,8 +2506,20 @@
                         <ul style="margin:0; padding-left:18px;">
                             <li><strong>자체 바이럴 채널 확보:</strong> 전략적 여론 형성</li>
                             <li><strong>명장면/리뷰 릴리즈:</strong> 주 1-3회 화제성 유지</li>
-                            <li><strong>자체 보유 유튜브:</strong> @nohsanghyun_zip</li>
-                            <li><strong>자체 보유 틱톡:</strong> nohsanghyun_zip</li>
+                            
+                            <li>
+                                <strong>자체 보유 유튜브:</strong> 
+                                <a href="https://www.youtube.com/@nohsanghyun_zip" target="_blank" style="color: #333; text-decoration: underline; cursor: pointer; font-weight: 700;">
+                                    @nohsanghyun_zip 🔗
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <strong>자체 보유 틱톡:</strong> 
+                                <a href="https://www.tiktok.com/@nohsanghyun_zip" target="_blank" style="color: #333; text-decoration: underline; cursor: pointer; font-weight: 700;">
+                                    nohsanghyun_zip 🔗
+                                </a>
+                            </li>
                         </ul>
                     </div>
 
@@ -2710,7 +2668,7 @@
             <h1 style="margin-top: 5px; font-weight: 900; font-size: 28px;">DOMESTIC FAN-MEETING & CROSS-MEDIA ARCHIVING</h1>
         </div>
 
-        <div style="margin-top: 30px; display: flex; gap: 30px; height: 520px;">
+        <div style="margin-top: -10px; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, 1fr); gap: 12px; height: 550px;">
             
             <div style="flex: 1; position: relative; border-radius: 20px; overflow: hidden; background: #2d3436; border: 1px solid #eee;">
                 <img src="june_integrated_visual.jpg" alt="June Integrated Strategy" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.85;">
@@ -3827,7 +3785,7 @@
             "글로벌 성과가 자산화되는 시점, <strong>매니지먼트의 공백은 단순한 휴식이 아닌 '브랜드 가치의 급격한 침식'</strong>으로 이어집니다."
         </p>
 
-        <div style="margin-top: 25px; display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 15px; height: 480px;">
+        <div style="margin-top: -10px; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, 1fr); gap: 12px; height: 550px;">
             
             <div style="background: #fff; border: 1px solid #fbdad0; border-radius: 20px; padding: 20px; box-shadow: 0 5px 15px rgba(231, 76, 60, 0.05);">
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
@@ -4134,14 +4092,14 @@
                 </thead>
                 <tbody style="color: #444;">
                     <tr style="border-bottom: 1px solid #eee; background: #fafafa;">
-                        <td style="padding: 10px; border-right: 1px solid #eee;">롤스로이스 / 메이드인플러스</td>
+                        <td style="padding: 10px; border-right: 1px solid #eee;">롤스로이스 / 아시아지부</td>
                         <td style="padding: 10px; border-right: 1px solid #eee; text-align: center;">노상현</td>
                         <td style="padding: 10px; border-right: 1px solid #eee; font-size: 10px; line-height: 1.4;">건명: 롤스로이스 스펙터(Spectre) 국내 홍보대사<br>매체: 하이엔드 매거진 및 브랜드 행사<br>기간: 6개월</td>
                         <td style="padding: 10px; border-right: 1px solid #eee; text-align: center; font-weight: 700; color: #2ecc71;">완료</td>
                         <td style="padding: 10px; font-size: 10px;">상반기 메이저 세일즈 성과</td>
                     </tr>
                     <tr style="border-bottom: 1px solid #eee;">
-                        <td style="padding: 10px; border-right: 1px solid #eee;">론진(Longines) / 지아이엔터</td>
+                        <td style="padding: 10px; border-right: 1px solid #eee;">론진 / 론진 코리아&글로벌</td>
                         <td style="padding: 10px; border-right: 1px solid #eee; text-align: center;">노상현</td>
                         <td style="padding: 10px; border-right: 1px solid #eee; font-size: 10px; line-height: 1.4;">브랜드: 론진 공식 앰버서더 파트너십<br>기간: 1년<br>매체: 전매체 및 글로벌 노출</td>
                         <td style="padding: 10px; border-right: 1px solid #eee; text-align: center; font-weight: 700; color: #2ecc71;">픽스</td>
@@ -4921,21 +4879,21 @@
             <td style="padding:10px; border-right:1px solid #eee;">LUW 유방암 캠페인 / 행사</td>
             <td style="padding:10px; border-right:1px solid #eee; text-align:center;">노상현</td>
             <td style="padding:10px; border-right:1px solid #eee; font-size:10px; line-height:1.4;">10월 17일 더블유매거진에서 주최하는 유방암 캠페인 행사</td>
-            <td style="padding:10px; border-right:1px solid #eee; text-align:center; font-weight:800;">픽스</td>
+            <td style="padding: 10px; border-right: 1px solid #eee; text-align: center; font-weight: 700; color: #e74c3c;">픽스</td>
             <td style="padding:10px; font-size:10px;">배우 참석 의사 전달 완료</td>
             </tr>
             <tr style="border-bottom:1px solid #eee;">
             <td style="padding:10px; border-right:1px solid #eee;">MAMA / 시상식</td>
             <td style="padding:10px; border-right:1px solid #eee; text-align:center;">노상현</td>
             <td style="padding:10px; border-right:1px solid #eee; font-size:10px; line-height:1.4;">연말 MAMA 홍콩 행사, 24년도에 이어 25년도 제안</td>
-            <td style="padding:10px; border-right:1px solid #eee; text-align:center; font-weight:800;">픽스</td>
+            <td style="padding: 10px; border-right: 1px solid #eee; text-align: center; font-weight: 700; color: #e74c3c;">픽스</td>
             <td style="padding:10px; font-size:10px;"></td>
             </tr>
             <tr style="border-bottom:1px solid #eee;">
             <td style="padding:10px; border-right:1px solid #eee;">에이글 / 행사</td>
             <td style="padding:10px; border-right:1px solid #eee; text-align:center;">노상현</td>
             <td style="padding:10px; border-right:1px solid #eee; font-size:10px; line-height:1.4;">콜리플라워 제안 -> 프랑스 컨텐포러리 아웃도어 브랜드로 배우 이미지 맞음.</td>
-            <td style="padding:10px; border-right:1px solid #eee; text-align:center; font-weight:800;">픽스</td>
+            <td style="padding: 10px; border-right: 1px solid #eee; text-align: center; font-weight: 700; color: #e74c3c;">픽스</td>
             <td style="padding:10px; font-size:10px;">4/4, 5pm 배우 참석, 셀럽 라인업 : 장윤주, 이동휘, + 1명 정도 더 진행 예정</td>
             </tr>
 
@@ -4943,7 +4901,7 @@
             <td style="padding:10px; border-right:1px solid #eee;">에르메스 / 행사</td>
             <td style="padding:10px; border-right:1px solid #eee; text-align:center;">노상현</td>
             <td style="padding:10px; border-right:1px solid #eee; font-size:10px; line-height:1.4;">행사 참석 여부 확인/td>
-            <td style="padding:10px; border-right:1px solid #eee; text-align:center; font-weight:800;">픽스</td>
+            <td style="padding: 10px; border-right: 1px solid #eee; text-align: center; font-weight: 700; color: #e74c3c;">픽스</td>
             <td style="padding:10px; font-size:10px;">4-3</td>
             </tr>
 
@@ -6078,10 +6036,10 @@
                 <div style="background: #0f2239; color: #fff; border-radius: 20px; padding: 22px;">
                     <strong style="font-size: 15px; color: #d4af37; display: block; margin-bottom: 12px;">🚀 2026 글로벌 앰버서더 공략 타겟</strong>
                     <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                        <span style="background: rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 50px; font-size: 11.5px;">하이엔드 오디오 (B&O, Devialet)</span>
-                        <span style="background: rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 50px; font-size: 11.5px;">수입 자동차 (BMW, Porsche)</span>
-                        <span style="background: rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 50px; font-size: 11.5px;">글로벌 뷰티 (Aesop, Le Labo)</span>
-                        <span style="background: rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 50px; font-size: 11.5px;">워치 & 주얼리 (Cartier, IWC)</span>
+                        <span style="background: rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 50px; font-size: 11.5px;">하이엔드 패션 (Suit/Outdoor)</span>
+                        <span style="background: rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 50px; font-size: 11.5px;">수입 자동차 (Rolls-Royce/Ferrari)</span>
+                        <span style="background: rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 50px; font-size: 11.5px;">글로벌 뷰티(Skincare/Perfume)</span>
+                        <span style="background: rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 50px; font-size: 11.5px;">워치앤주얼리(Cartier/Boucheron)</span>
                     </div>
                 </div>
 
@@ -6404,31 +6362,6 @@
         }).join('');
     }
 
-    let currentScale = 1.0; // 기본 배율 1.0
-
-        function controlZoom(change) {
-            // 배율 변경 (최소 0.3 ~ 최대 2.0까지만 제한)
-            const newScale = currentScale + change;
-            if (newScale < 0.3 || newScale > 2.0) return;
-
-            currentScale = newScale;
-
-            // 모든 슬라이드 찾아서 크기 조절
-            const slides = document.querySelectorAll('.slide');
-            slides.forEach(slide => {
-                // 중요: 기존의 중앙 정렬(translateY)을 유지하면서 scale만 변경
-                slide.style.transform = `translateY(-50%) scale(${currentScale})`;
-            });
-
-            // 가운데 % 숫자 업데이트
-            document.getElementById('zoom-level').innerText = Math.round(currentScale * 100) + '%';
-        }
-
-        // (옵션) 모바일 접속 시 자동으로 조금 작게 시작하게 하려면 아래 주석을 푸세요
-        if (window.innerWidth < 768) {
-            controlZoom(-0.4); // 60%로 시작
-        }
-        
     /**
      * [5] 사이드바 닫기 함수
      */
@@ -6499,50 +6432,82 @@
             e.preventDefault();
         }
     });
-    /* --- [JS 추가: 화면 맞춤 스케일링 스크립트] --- */
+    /* =========================================
+       5. [핵심 수정] 하이브리드 화면 맞춤 로직
+       PC: 스크롤 막고 한눈에 보기 / 모바일: 스크롤&줌 허용
+       ========================================= */
+    
+    // 모바일 기기 감지
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        let currentScale = 1.0;
+
+        if (isMobile) {
+            document.body.style.overflow = 'auto'; 
+            document.body.style.touchAction = 'pan-y'; 
+            
+            // ★ [추가] 모바일/패드일 경우 body에 클래스 추가
+            document.body.classList.add('mobile-mode'); 
+        } else {
+            document.body.style.overflow = 'hidden'; 
+            document.body.style.touchAction = 'auto';
+        }
+
     function fitSlideToScreen() {
         const slides = document.querySelectorAll('.slide');
-        const baseWidth = 1280; // 슬라이드 원본 너비
-        const baseHeight = 720; // 슬라이드 원본 높이
+        const baseWidth = 1280; 
+        const baseHeight = 720; 
+        const navHeight = 65; // 메뉴바 높이
         
+        // 현재 브라우저 크기
         const windowWidth = window.innerWidth;
-        const windowHeight = window.innerHeight;
+        const windowHeight = window.innerHeight - navHeight; 
 
-        // 화면 비율과 슬라이드 비율을 계산해서 축소 비율(Scale) 산출
+        // PC에서는 화면에 꽉 차게 계산
         let scaleX = windowWidth / baseWidth;
         let scaleY = windowHeight / baseHeight;
         
-        // 너비와 높이 중 더 작은 쪽을 기준으로 비율 설정 (화면에 꽉 차게)
-        // 단, 1280px보다 화면이 클 때는 확대하지 않음 (1로 고정하려면 Math.min에 1 추가)
-        let scale = Math.min(scaleX, scaleY); 
+        // 더 작은 비율에 맞춰서 잘림 방지
+        let scale = Math.min(scaleX, scaleY);
 
-        // 화면이 1280px보다 작을 때만 마진 제거 로직 발동 등을 위해
-        // PC에서는 1배율 이상으로 커지지 않게 제한 (선택사항, 지금은 제거함)
+        // PC는 살짝 여유를 둠 (0.9), 모바일은 거의 꽉 차게 (0.95)
+        scale *= isMobile ? 0.95 : 0.90;
+
+        currentScale = scale;
         
-        // 모바일/태블릿 여백 확보를 위해 0.95 정도 곱해줌 (화면 꽉 차서 답답한 것 방지)
-        if (windowWidth < 1280) {
-            scale *= 0.95; 
-        }
-
         slides.forEach(slide => {
-            // 스케일 적용
-            slide.style.transform = `scale(${scale})`;
-            
-            // 스케일이 줄어들면 원래 차지하던 공간은 그대로라서 여백이 생김.
-            // 이를 방지하기 위해 네거티브 마진이나 절대 위치를 쓸 수도 있지만,
-            // flexbox 중앙 정렬(.section-wrapper)이 되어 있다면 transform만으로 충분합니다.
-            
-            // *중요: 태블릿 세로 모드 등에서 슬라이드가 너무 작아 보이면 아래 코드로 높이 강제 조정 가능
-            // slide.style.height = `${baseHeight}px`; 
-            // slide.style.width = `${baseWidth}px`;
+            slide.style.transform = `scale(${currentScale})`;
         });
     }
 
-    // 1. 페이지 로드 시 실행
-    window.addEventListener('load', fitSlideToScreen);
+    // 수동 줌 컨트롤
+    window.controlZoom = function(change) {
+        currentScale += change;
+        if (currentScale < 0.2) currentScale = 0.2;
+        if (currentScale > 3.0) currentScale = 3.0;
+        
+        const slides = document.querySelectorAll('.slide');
+        slides.forEach(slide => {
+            slide.style.transform = `scale(${currentScale})`;
+        });
+    };
 
-    // 2. 화면 크기 바뀔 때마다(가로/세로 회전 등) 실행
-    window.addEventListener('resize', fitSlideToScreen);
+    // [이벤트 리스너 등록]
+    window.addEventListener('load', () => {
+        if(sections[0]) sections[0].scrollIntoView({ behavior: 'auto', block: 'center' });
+        fitSlideToScreen();
+    });
+
+    // PC: 창 크기 조절 시 실시간 반응
+    window.addEventListener('resize', () => {
+        if (!isMobile) {
+            fitSlideToScreen();
+        }
+    });
+
+    // 모바일: 회전할 때만 반응 (줌 할때는 반응 X)
+    window.addEventListener('orientationchange', () => {
+        setTimeout(fitSlideToScreen, 200);
+    });
 </script>
 </body>
 </html>
