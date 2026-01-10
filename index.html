@@ -459,6 +459,52 @@
         color: var(--accent-gold); /* 골드색으로 핵심 단어 강조 */
         font-weight: 700;
     }
+    /* 줌 컨트롤러 스타일 */
+    .zoom-controls {
+        position: fixed;
+        top: 20px;
+        right: 20px; /* 우측 상단 배치 (스크롤바 고려해서 위치 조정 가능) */
+        z-index: 99999;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(10px);
+        padding: 8px 12px;
+        border-radius: 30px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .zoom-btn {
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        padding: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: background 0.2s;
+    }
+
+    .zoom-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .zoom-btn:active {
+        transform: scale(0.95);
+    }
+
+    #zoom-level {
+        color: white;
+        font-size: 14px;
+        font-weight: 600;
+        min-width: 45px;
+        text-align: center;
+        font-family: 'Pretendard', sans-serif;
+    }
 </style>
 </head>
 <body><div id="security-gate">
@@ -533,6 +579,20 @@
     <nav id="sidebar-content">
         </nav>
 </aside>
+<div class="zoom-controls">
+    <button onclick="controlZoom(-0.1)" class="zoom-btn">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+    </button>
+    <span id="zoom-level">100%</span>
+    <button onclick="controlZoom(0.1)" class="zoom-btn">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+    </button>
+</div>
 <div class="main-wrapper">
     <div class="scroll-nav">
         <button class="scroll-btn" onclick="moveSlide(-1)">▲</button>
@@ -6344,6 +6404,31 @@
         }).join('');
     }
 
+    let currentScale = 1.0; // 기본 배율 1.0
+
+        function controlZoom(change) {
+            // 배율 변경 (최소 0.3 ~ 최대 2.0까지만 제한)
+            const newScale = currentScale + change;
+            if (newScale < 0.3 || newScale > 2.0) return;
+
+            currentScale = newScale;
+
+            // 모든 슬라이드 찾아서 크기 조절
+            const slides = document.querySelectorAll('.slide');
+            slides.forEach(slide => {
+                // 중요: 기존의 중앙 정렬(translateY)을 유지하면서 scale만 변경
+                slide.style.transform = `translateY(-50%) scale(${currentScale})`;
+            });
+
+            // 가운데 % 숫자 업데이트
+            document.getElementById('zoom-level').innerText = Math.round(currentScale * 100) + '%';
+        }
+
+        // (옵션) 모바일 접속 시 자동으로 조금 작게 시작하게 하려면 아래 주석을 푸세요
+        if (window.innerWidth < 768) {
+            controlZoom(-0.4); // 60%로 시작
+        }
+        
     /**
      * [5] 사이드바 닫기 함수
      */
