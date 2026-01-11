@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>배우 노상현 2026 로드맵 - CONFIDENTIAL</title>
 <style>
 
@@ -4102,7 +4102,7 @@
                         <td style="padding: 10px; border-right: 1px solid #eee;">론진 / 론진 코리아&글로벌</td>
                         <td style="padding: 10px; border-right: 1px solid #eee; text-align: center;">노상현</td>
                         <td style="padding: 10px; border-right: 1px solid #eee; font-size: 10px; line-height: 1.4;">브랜드: 론진 공식 앰버서더 파트너십<br>기간: 1년<br>매체: 전매체 및 글로벌 노출</td>
-                        <td style="padding: 10px; border-right: 1px solid #eee; text-align: center; font-weight: 700; color: #2ecc71;">픽스</td>
+                        <td style="padding: 10px; border-right: 1px solid #eee; text-align: center; font-weight: 700; color: #6c5ce7;">논의 중</td>
                         <td style="padding: 10px; font-size: 10px;">계약 체결 및 온에어 대기 중</td>
                     </tr>
                     <tr style="border-bottom: 1px solid #eee;">
@@ -5796,7 +5796,7 @@
                     <div style="background: #0f2239; color: #fff; border-radius: 15px; padding: 15px; border-left: 5px solid #d4af37; box-shadow: 0 8px 20px rgba(15,34,57,0.12);">
                         <strong style="font-size: 14px; color: #d4af37; display: block; margin-bottom: 4px;">노상현의 하이엔드 아이덴티티</strong>
                         <p style="font-size: 11px; line-height: 1.6; margin: 0; word-break: keep-all; opacity: 0.9;">
-                            단순 인지도를 넘어선 <b>압도적 피지컬(183cm)</b>과 <b>Native 소통 능력</b>. 럭셔리 브랜드 본사가 추구하는 글로벌 페르소나에 가장 근접한 모델.
+                            단순 인지도를 넘어선 <b>절제된 남성미</b>와 <b>동서양을 아우르는 깊이 있는 마스크</b>. 럭셔리 브랜드 본사가 추구하는 글로벌 페르소나에 가장 근접한 모델.
                         </p>
                     </div>
 
@@ -6195,7 +6195,7 @@
             }
         });
         
-        // 2. 비밀번호 체크 함수 (8시간 단위 리셋)
+        // 2. 비밀번호 체크 함수 (8시간 단위 + 08시 타임 1.5시간 연장)
         window.checkGatePassword = function() {
             const now = new Date();
             const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
@@ -6203,16 +6203,30 @@
 
             const day = ("0" + kst.getDate()).slice(-2);
             const hour = kst.getHours();
+            const minutes = kst.getMinutes(); // 분 단위 체크를 위해 추가
 
-            // ✅ 8시간 단위 블록 계산
-            const hourBlock = ("0" + (Math.floor(hour / 8) * 8)).slice(-2);
+            // [기본 로직] 현재 시간 기준 8시간 블록 계산 (00, 08, 16)
+            const currentBlockNum = Math.floor(hour / 8) * 8;
+            const currentBlockStr = ("0" + currentBlockNum).slice(-2);
+            
+            // 현재 시간의 정석 비밀번호
+            const currentPassword = "1412" + day + currentBlockStr;
 
-            // 비밀번호 생성
-            const dynamicPassword = "1412" + day + hourBlock;
+            // [예외 로직] 16:00 ~ 17:30 사이라면 '08'시 비밀번호도 허용
+            let extendedPassword = null;
+            
+            // 현재 블록이 16시이고, 시간이 16시이거나 17시 30분 이하일 때
+            if (currentBlockNum === 16) {
+                if (hour === 16 || (hour === 17 && minutes <= 30)) {
+                    // 08시 타임 패스워드 생성
+                    extendedPassword = "1412" + day + "08"; 
+                }
+            }
 
             const inputVal = document.getElementById('gate-pass').value;
 
-            if (inputVal === dynamicPassword) {
+            // 입력값이 '현재 비번' 이거나 '연장된 08시 비번' 이면 통과
+            if (inputVal === currentPassword || (extendedPassword && inputVal === extendedPassword)) {
                 const gate = document.getElementById('security-gate');
                 gate.style.transition = "0.8s ease";
                 gate.style.opacity = "0";
@@ -6226,8 +6240,6 @@
                 document.getElementById('gate-pass').value = "";
             }
         };
-
-
         // 엔터키 지원
         document.getElementById('gate-pass').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') { checkGatePassword(); }
@@ -6442,9 +6454,7 @@
         let currentScale = 1.0;
 
         if (isMobile) {
-            document.body.style.overflow = 'auto'; 
-            document.body.style.touchAction = 'pan-y'; 
-            
+            document.body.style.overflow = 'auto';           
             // ★ [추가] 모바일/패드일 경우 body에 클래스 추가
             document.body.classList.add('mobile-mode'); 
         } else {
